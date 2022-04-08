@@ -2,9 +2,7 @@ package effective_java.design_pattern.singleton_pattern;
 
 // 늦은 초기화
 public class Singleton_lateInitialization_InMultiThread {
-
     private static Singleton_lateInitialization_InMultiThread instance;
-
     private Singleton_lateInitialization_InMultiThread() {} // 생성자를 private로
 
     public static Singleton_lateInitialization_InMultiThread getInstance() {
