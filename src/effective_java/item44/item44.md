@@ -10,5 +10,62 @@
 
 → 같은 효과의 함수 객체를 받는 정적 팩터리나 생성자를 제공하는 것이다. 
 
+→ 일반화해서 말하면, 함수 객체를 매개변수로 받는 생성자와 메서드를 더 많이 만들어야 한다.
 
 
+LinkedHashMap을 생각해보자. 이 클래스의 protected 메서드인 removeEldestEntry를 재정의하면 캐시로 사용할 수 있다. 
+
+맵에 새로운 키를 추가하는 put 메서드는 이 메서드를 호출하여 true가 반환되면 맵에서 가장 오래된 원소를 제거한다. 
+
+예) removeEldestEntry를 다음처럼 재정의하면 맵에 원소가 100개가 될 때까지 커지다가, 그 이상이 되면 새로운 키가 더해질 때마다 가장 오래된 원소를 하나씩 제거한다. 
+
+즉, 가장 최근 원소 100개를 유지한다. 
+
+``` java
+protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
+    return size() > 100;
+}
+```
+잘 동작하지만 람다를 사용하면 훨씬 잘 해낼 수 있다.
+
+LinkedHashMap을 오늘날 다시 구현한다면 함수 객체를 받는 정적 팩터리나 생성자를 제공했을 것이다. 
+
+
+코드 44-1 불필요한 함수형 인터페이스 - 대신 표준 함수형 인터페이스를 사용하라
+``` java
+@FunctionaInterface EldestEntryRemovalFunction<K,V> {
+    boolean remove(Map<K,V> map, Map.Entry<K,V> eldest);
+}
+```
+이 인터페이스도 잘 동작하기는 하지만, 굳이 사용할 이유는 없다. 
+
+Because __ 자바 표준 라이브에 이미 같은 모양의 인터페이스가 준비되어 있다.
+
+java.util.function 패키지를 보면 다양한 용도의 표준 함수형 인터페이스가 담겨 있다. 
+
+> 필요한 용도에 맞는 게 있다면, 직접 구현하지 말고 표준 함수형 인터페이스를 활용하라.
+
+예컨대 Predicate 인터페이스는 프레디키트(predicate)들을 조합하는 메서드를 제공한다. 
+
+앞의 LinkedHashMap 예에서는 직접 만든 EldestEntryRemovalFunction 대신 표준 인터페이스인 
+
+BiPredicate<Map<K,V>>, Map.Entry<K,V>을 사용할 수 있다. 
+
+
+**직접 만든 함수형 인터페이스에은 항상 @FunctionalInterface 애너테이션을 사용하자 **
+
+
+
+
+#### 함수형 인터페이스를 API에서 사용할 때 주의점
+- 서로 다른 함수형 인터페이스를 같은 위치의 인수로 받는 메서드들을 다중 정의해서는 안 된다. (이유: 클라이언트에게 불필요한 모호함, 모호함이 문제를 일으킴)
+
+
+
+
+### 핵심 정리
+- 자바도 람다를 지원한다. 
+- API를 설계할 때 람다도 염두에 두어야 한다
+- 입력값과 반환값에 함수형 인터페이스 타입을 활용하라
+- java.util.function 패키지의 표준 함수형 인터페이스를 사용하는 것이 Best Choice
+- 단, 흔치는 않지만 직접 새로운 함수형 인터페이스를 만들어 쓰는 편이 나을 수도 있다. 
